@@ -1,0 +1,16 @@
+*.pyc
+__pycache__
+db.sqlite3
+/env
+*.env
+.vscode
+.idea
+# Ignore compiled binaries
+*.exe
+*.dll
+# Ignore generated files
+/build/
+/dist/
+# Ignore IDE-specific files
+.vscode/
+.idea/

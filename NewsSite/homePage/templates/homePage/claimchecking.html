@@ -1,0 +1,34 @@
+{% extends 'homePage/index.html' %} {% block content %}
+
+<div class="container mt-4">
+  <div class="row">
+    <!-- Detection Window Column -->
+    <div class="col-md-8">
+      <!-- Detection page -->
+      <div class="detectionWindow">
+        <h3>claim checking model</h3>
+
+        <form action="{% url 'claimcheck' %}" method="post">
+          {% csrf_token %}
+          <!-- <label for="user_input">Enter news text:</label>-->
+          <br />
+          <textarea
+            id="user_input"
+            name="user_input"
+            required
+            oninput="setUserInputToSessionStorage()"
+          ></textarea>
+          <br />
+          <button type="submit" class="btn btn-dark">Predict</button>
+        </form>
+      </div>
+    </div>
+
+    <!-- Result section -->
+    <div class="col-md-4">
+      <h3>Result</h3>
+      {{ context }} {{ claim_results }}
+    </div>
+  </div>
+</div>
+{% endblock %}

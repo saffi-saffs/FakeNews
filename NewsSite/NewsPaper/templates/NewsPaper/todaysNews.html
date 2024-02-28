@@ -1,0 +1,61 @@
+{% extends 'homePage/index.html' %} 
+{% block content %}
+
+<title>full News</title>
+<style>
+  body {
+    font-family: Arial, sans-serif;
+    line-height: 1.6;
+    margin: 20px;
+  }
+
+  h1 {
+    color: #080808;
+  }
+
+  .news-entry {
+    border-bottom: 1px solid #ccc;
+    padding-bottom: 20px;
+    margin-bottom: 20px;
+  }
+
+  .title {
+    font-size: 1.2em;
+    font-weight: bold;
+    color: #141414;
+  }
+
+  .published-date {
+    color: #555;
+  }
+
+  .source {
+    color: #777;
+  }
+
+  .news-summary {
+    margin-top: 10px;
+  }
+
+  .news-entry {
+    border: 1px solid #ddd;
+    border-radius: 8px;
+    padding: 20px;
+    margin-bottom: 20px;
+    box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+  }
+</style>
+<div id="newsBox">
+  <h1>database RENDER </h1>
+    <ul>
+        {% for article in articles %}
+            <li>
+                <h2>{{ article.title }}</h2>
+                <p>{{ article.published_date }}</p>
+                <p>{{ article.publisher }}</p>
+                <a href="{{ article.link }}">Read more</a>
+            </li>
+        {% endfor %}
+</div>
+
+{% endblock %}

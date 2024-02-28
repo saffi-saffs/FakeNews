@@ -1,0 +1,115 @@
+{% extends 'homePage/index.html' %}
+{% block content %}
+  
+<div class="container mt-4">
+  <div class="row">
+    <!-- Detection Window Column -->
+    <div class="col-md-8">
+      <!-- Detection page -->
+      <div class="detectionWindow">
+        <h3>Fake News Detection System</h3> 
+   
+        <form action="{% url 'home' %}" method="post" >
+          {% csrf_token %}
+          <!-- <label for="user_input">Enter news text:</label>-->
+          <br>
+          <textarea id="user_input" name="user_input" required oninput="setUserInputToSessionStorage()"></textarea>
+          <br>
+          <button type="submit" class="btn btn-dark">Predict</button>
+        </form>
+      </div>
+    </div>
+
+    <!-- Result section -->
+    <div class="col-md-4">
+      <h3> Result</h3>
+      {% if result %}
+        <p>{{ result }}</p>
+        <p>{{ prediction }}</p>
+        <div id="myProgress">
+          <div id="myBar"></div>
+        </div>
+      {% endif %}
+    </div>
+
+  </div>
+
+  <!-- JavaScript code for the progress bar -->
+  <script>
+    var i = 0;
+    var prediction = "{{ prediction|default:0 }}";
+    move(parseFloat(prediction) * 100);
+
+    function move(uiValue) {
+      if (i == 0) {
+        i = 1;
+        var elem = document.getElementById("myBar");
+        var width = 10;
+        var id = setInterval(frame, 10);
+
+        function frame() {
+          if (width >= uiValue) {
+            clearInterval(id);
+            i = 0;
+          } else {
+            width++;
+            elem.style.width = width + "%";
+            elem.innerHTML = width + "%";
+          }
+        }
+      }
+    }
+  </script>
+
+  <!-- JavaScript code for session storage and AJAX request -->
+  <script>
+    function setUserInputToSessionStorage() {
+      userInputValue = document.getElementById('user_input').value;
+      sessionStorage.setItem('user_input', userInputValue);
+    }
+
+    async function makePrediction(event) {
+      event.preventDefault();  // Prevent default form submission behavior
+
+      // Get user input
+      userInputValue = document.getElementById('user_input').value;
+
+      try {
+        // asynchronous POST request to the Django view
+        const response = await fetch('{% url "home" %}', {
+          method: 'POST',
+          headers: {
+            'Content-Type': 'application/x-www-form-urlencoded',
+            'X-CSRFToken': '{{ csrf_token }}',
+          },
+          body: new URLSearchParams({
+            'user_input': userInputValue,
+          }),
+        });
+
+        const data = await response.json();
+        console.log(data);
+
+        // Update only the result section dynamically
+        document.getElementById('result').innerHTML = '<p>' + data.result + '</p><p>' + data.prediction + '</p>';
+
+        // Set the user input back to the input field
+        document.getElementById('user_input').value = userInputValue;
+      } catch (error) {
+        console.error('Error:', error);
+      }
+    }
+
+    // Retain user input on page reload
+    window.onload = function() {
+      // Check session storage for user input
+      const storedUserInput = sessionStorage.getItem('user_input');
+      
+      if (storedUserInput) {
+        document.getElementById('user_input').value = storedUserInput;
+      }
+    };
+  </script>
+
+</div>
+{% endblock %}
