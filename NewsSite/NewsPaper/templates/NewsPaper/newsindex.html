@@ -1,5 +1,4 @@
-{% extends 'homePage/index.html' %} 
-{% block content %}
+{% extends 'homePage/index.html' %} {% block content %}
 
 <title>Top News</title>
 <style>
@@ -43,32 +42,20 @@
   }
 </style>
 
-<div id="breaking-news">
-  <p>{% for entry in breaking_news %}{{ entry.title }}{% endfor %}</p>
-</div>
-
 <h1>Today's News</h1>
 
-
-
- 
-
-
-    {% for entry in entry_details %}
-        <div class="news-entry">
-            <p class="title"> {{ entry.title }}</p>
-            <p class="published-date">Published on: {{ entry.published_date }}</p>       
-            <p class="news-summary">{{ entry.news_summary | safe}}</p>
-         <p>source  {% for sub_article in entry.sub_articles %}
-                <li>{{ sub_article.publisher }}</li>
-            {% endfor %}</p>
-        </div>
+{% for entry in entry_details %}
+<div class="news-entry">
+  <p class="title">{{ entry.title }}</p>
+  <p class="published-date">Published on: {{ entry.published_date }}</p>
+  <p class="news-summary">{{ entry.news_summary | safe}}</p>
+  <p>
+    source: {% for sub_article in entry.sub_articles %}
+    <li>{{ sub_article.publisher }}</li>
     {% endfor %}
-
-
-
-
-{% if entry_details.has_other_pages %}
+  </p>
+</div>
+{% endfor %} {% if entry_details.has_other_pages %}
 <div class="pagination">
   <span class="step-links">
     {% if entry_details.has_previous %}
@@ -81,16 +68,14 @@
     </span>
 
     {% if entry_details.has_next %}
-    <a id="next-link" href="javascript:void(0);" onclick="loadNextPage('{{ entry_details.next_page_url }}')">next</a>
+    <a
+      id="next-link"
+      href="javascript:void(0);"
+      onclick="loadNextPage('{{ entry_details.next_page_url }}')"
+      >next</a
+    >
     <a href="?page={{ entry_details.paginator.num_pages }}">last &raquo;</a>
     {% endif %}
   </span>
 </div>
-{% endif %}
-
-{% endblock %}
-
-
-
-
-
+{% endif %} {% endblock %}

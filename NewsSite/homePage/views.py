@@ -22,7 +22,7 @@ nltk.download('stopwords')
 # Load Keras model
 model = load_model("C:\\Users\\Admin\\Downloads\\yt_balanced_lstm1.h5")
 model1 = load_model("E:\\models\\models\\model.h5")
-model2 = load_model("E:\\models\\models\\modelright.h5")
+model2 = load_model("E:\\models\\models\\Pretainedmodelright.h5")
 
 # Initialize Tokenizer
 tokenizer = Tokenizer()
@@ -63,41 +63,60 @@ def NewsDisplay(request):
     tfidf_matrix = vectorizer.fit_transform([processed_claim] + processed_articles)
     similarity_scores = cosine_similarity(tfidf_matrix[0:1], tfidf_matrix[1:])[0]
     return similarity_scores
+def determine_stance(prediction):
+    # Define the labels for different stances
+    stances = ['Agree', 'Disagree', 'Discuss', 'Unrelated']
+    
+    # Determine the index of the maximum predicted value
+    max_index = np.argmax(prediction)
+    
+    # Return the stance corresponding to the maximum index
+    return stances[max_index]
 
-def check_stances(claim_text, articles):
+
+def check_stances(claim_text, articles, max_articles=15):
     processed_claim = preprocess_text(claim_text)
-    processed_articles = [preprocess_text(article) for article in articles]
-    headline_sequence = preprocess_input(processed_articles, 1000)
+    processed_articles = [preprocess_text(article['title']) for article in articles[:max_articles]]
+    headline_sequences = [preprocess_input(article, 1000) for article in processed_articles]
     body_sequence = preprocess_input(processed_claim, 2000)
 
-    prediction1 = model1.predict([headline_sequence, body_sequence])
-    prediction2 = model2.predict([headline_sequence, body_sequence])
-    all_predictions = np.concatenate([prediction1, prediction2])
-  
+    predictions1 = [model1.predict([headline_sequence, body_sequence]) for headline_sequence in headline_sequences]
+    predictions2 = [model2.predict([headline_sequence, body_sequence]) for headline_sequence in headline_sequences]
+    combined_predictions = [(p1 + p2) / 2 for p1, p2 in zip(predictions1, predictions2)]
 
-    predicted_stance = {'p1': prediction1, 'p2': prediction2}
+    predicted_stances = []
+    for article, p1, p2, avg_prediction in zip(articles[:max_articles], predictions1, predictions2, combined_predictions):
+        max_p1_value = determine_stance(p1)
+        max_p2_value = determine_stance(p2) 
+        max_avg_value = determine_stance(avg_prediction) 
 
-    return predicted_stance
 
-def verify_claim(claim_text):
-    gn = GoogleNews(lang='en', country='US')
+         
+        predicted_stances.append({'title': article['title'],'link':article['link'] ,'p1': p1, 'p2': p2, 'average': avg_prediction, 'maxp1': max_p1_value, 'maxp2': max_p2_value, 'maxavg': max_avg_value})
+
+    return predicted_stances
+
+
+
+def verify_claim(claim_text, max_articles=10):
+    gn = GoogleNews(lang='en',country='US')
     search_results = gn.search(preprocess_text(claim_text))
-    articles = [entry['title'] for entry in search_results['entries']]
-    predicted_stance = check_stances(claim_text, articles)
-    claim_results = []
-    for article, p1, p2 in zip(articles, predicted_stance['p1'], predicted_stance['p2']):
-        avg_stance = (p1 + p2) / 2  # Calculate the average stance
-        claim_results.append((article, avg_stance))
-    
+    articles = search_results['entries'][:max_articles]  # Limit the number of articles
+    claim_results = check_stances(claim_text, articles)
     return claim_results
+
 
 def ClaimCheck(request):
     if request.method == 'POST':
         claim_text = request.POST.get('user_input')
+        prediction = predict_fake_news(claim_text)
+        result = 'This news is likely real.' if prediction > 0.8 else 'This news is likely fake.'  
+          
         if claim_text:
             claim_results = verify_claim(claim_text)
-            # Limit the number of results to 10
-            claim_results = claim_results[:10]
-            context = {'claim_results': claim_results}
+            
+            
+            context = {'claim_results': claim_results
+                       ,'result':result,'prediction': prediction}
             return render(request, "homePage/claimchecking.html", context)
     return render(request, "homePage/claimchecking.html")

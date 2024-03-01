@@ -7,7 +7,7 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
     <title>News</title>
 
-    <link rel="stylesheet"href="{% static 'homePage/styles.css' %}"/>
+    <link rel="stylesheet" href="{% static 'homePage/styles.css' %}" />
 
     <link
       rel="stylesheet"
@@ -17,13 +17,14 @@
     />
   </head>
 
-
   <body>
     <div class="headline">
       <h2>News Portal</h2>
     </div>
-    <nav class="navbar navbar-expand-lg navbar-light bg-light justify-content-space-between">
-     <!-- <a class="navbar-brand" href="#">
+    <nav
+      class="navbar navbar-expand-lg navbar-light bg-light justify-content-space-between"
+    >
+      <!-- <a class="navbar-brand" href="#">
         <img src="NewsSite\homePage\img\logo-removebg-preview.png" alt="Logo" height="25" />
       </a>-->
 
@@ -37,16 +38,15 @@
           <li class="nav-item">
             <a class="nav-link" href="{% url 'news' %}">Today's News</a>
           </li>
-            <li class="nav-item">
+          <li class="nav-item">
             <a class="nav-link" href="{% url 'claimcheck' %}">claim check</a>
           </li>
         </ul>
       </div>
     </nav>
 
-    <!--nav bar ends-->  
-    {% block content %}
-    {% endblock %}
+    <!--nav bar ends-->
+    {% block content %} {% endblock %}
     <!--end result-->
     <!--jQuery links-->
     <script
@@ -64,6 +64,5 @@
       integrity="sha384-JZR6Spejh4U02d8jOt6vLEHfe/JQGiRRSQQxSfFWpi1MquVdAyjUar5+76PVCmYl"
       crossorigin="anonymous"
     ></script>
-    
   </body>
 </html>
