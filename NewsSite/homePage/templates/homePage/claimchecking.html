@@ -1,16 +1,18 @@
 {% extends 'homePage/index.html' %} {% block content %}
 <style>
+ 
   #modelPredictions {
     width: 100%;
-    height: 500px;
+    height: 300px;
     border-bottom: 1px solid #ccc;
-    padding-bottom: 20px;
-    margin-bottom: 20px;
+    padding-bottom: 10px;
+    margin-bottom: 10px;
     border: 1px solid #ddd;
     border-radius: 8px;
     padding: 10px;
     box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
     overflow-y: auto;
+    
   }
 a:link { 
   text-decoration: none; 
@@ -18,7 +20,7 @@ a:link {
 } 
 a:visited { 
   text-decoration: none; 
-  color:black;
+  
 
 } 
 a:hover { 
@@ -32,7 +34,7 @@ a:active {
 }
 
 </style>
-<div class="container mt-4">
+<div class="container-fluid mt-4 justify-content-center">
   <div class="row justify-content-center">
     <!-- Detection Window Column -->
     <div class="col-md-8">
@@ -49,6 +51,7 @@ a:active {
             name="user_input"
             required
             oninput="setUserInputToSessionStorage()"
+            style="width: 80%;"
           ></textarea>
           <br />
           <button type="submit" class="btn btn-dark">Predict</button>
@@ -57,10 +60,20 @@ a:active {
     </div>
   </div>
   <!-- Result section -->
-  <div class="col-md-12 mt-4">
-    <h4>Result</h4>
-    <div class="row">
-      <div class="col-md-3 mb-3">{{ result }}</div>
+  <div class="container-fluid mt-4 justify-content-center">
+    <h4 class="justify-content-center">Result</h4>
+    <div class="row justify-content-center">
+      <div class="col-md-3 mb-3 ">
+        {% if result == 'This news is likely real.' %}
+                <strong style="font-size: 1.5rem; color: green;">{{result}}</strong>
+                 <p>{{ prediction }}</p>
+                  {% else %}
+               <strong style="font-size: 1.5rem; color: red;">{{result}}</strong>
+               <p>{{ prediction }}</p>
+                
+                {% endif %}
+        
+      </div>
       {% for article in claim_results %}
       <div class="col-md-4 mb-4">
           <a href="{{ article.link }}">

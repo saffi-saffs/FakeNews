@@ -1,115 +1,50 @@
-{% extends 'homePage/index.html' %}
-{% block content %}
-  
-<div class="container mt-4">
-  <div class="row">
-    <!-- Detection Window Column -->
-    <div class="col-md-8">
-      <!-- Detection page -->
-      <div class="detectionWindow">
-        <h3>Fake News Detection System</h3> 
-   
-        <form action="{% url 'home' %}" method="post" >
-          {% csrf_token %}
-          <!-- <label for="user_input">Enter news text:</label>-->
-          <br>
-          <textarea id="user_input" name="user_input" required oninput="setUserInputToSessionStorage()"></textarea>
-          <br>
-          <button type="submit" class="btn btn-dark">Predict</button>
-        </form>
-      </div>
-    </div>
+{% extends 'homePage/index.html' %} {% block content %}
+<div class="bodyText">
+ <h2 style="text-align: center; font-size:2.25rem;">The fake news detector you didn't know you needed.</h3>
 
-    <!-- Result section -->
-    <div class="col-md-4">
-      <h3> Result</h3>
-      {% if result %}
-        <p>{{ result }}</p>
-        <p>{{ prediction }}</p>
-        <div id="myProgress">
-          <div id="myBar"></div>
+      <div class="row">
+        <div class="col-sm-4 mb-3 mb-sm-0">
+          <div class="card">
+            <div class="center" style="height: 310px;">
+            <br>
+            <i class="large material-icons" style="color: #ee6e73">sick</i>
+            <div class="card-body">
+              <h5 class="card-title"><p>Is the dis(information) age making you sick?</p></h5>
+              <p class="card-text"><p class="light center">Don't fret, and cure your illness with this brand-new detector.</p></p>
+            </div>
+          </div>
+          </div>
         </div>
-      {% endif %}
-    </div>
+        <div class="col-sm-4 mb-3 mb-sm-0">
+          <div class="card"style="height: 310px;">
+            <div class="center">
+            <br>
+            <i class="large material-icons" style="color: green">fact_check</i>
+            <div class="card-body">
+              <h5 class="card-title"><p>Fact-check the news you read every day.</p></h5>
+              <p class="card-text"><p class="light center">Just copy the text you want to try out. Press the button below.</p></p>
+            </div>
+          </div>
+          </div>
+        </div>
+        <div class="col-sm-4 mb-3 mb-sm-0">
+          <div class="card" style="height: 310px;">
+            <div class="center">
+            <br>
+            <i class="large material-icons" style="color: #fa9905">sentiment_very_satisfied</i>
+            <div class="card-body">
+              <h5 class="card-title"><p>A Machine Learning approach.</p></h5>
+              <p class="card-text"><p class="light center">If you're satisfied, we collect the results of the news you send to us.</p></p>
+            </div>
+          </div>
+          </div>
+        </div>
 
-  </div>
+      </div>
 
-  <!-- JavaScript code for the progress bar -->
-  <script>
-    var i = 0;
-    var prediction = "{{ prediction|default:0 }}";
-    move(parseFloat(prediction) * 100);
+      </div>
+      <div class="d-grid gap-2 col-2 mx-auto">
+        <a href="{% url 'claimcheck' %}" class="btn btn-primary"  role="button" aria-disabled="true" style="--bs-btn-padding-y: 20rem; --bs-btn-padding-x: 30rem; --bs-btn-font-size: 1.75rem;">Make Prediction</a>
+      </div>
 
-    function move(uiValue) {
-      if (i == 0) {
-        i = 1;
-        var elem = document.getElementById("myBar");
-        var width = 10;
-        var id = setInterval(frame, 10);
-
-        function frame() {
-          if (width >= uiValue) {
-            clearInterval(id);
-            i = 0;
-          } else {
-            width++;
-            elem.style.width = width + "%";
-            elem.innerHTML = width + "%";
-          }
-        }
-      }
-    }
-  </script>
-
-  <!-- JavaScript code for session storage and AJAX request -->
-  <script>
-    function setUserInputToSessionStorage() {
-      userInputValue = document.getElementById('user_input').value;
-      sessionStorage.setItem('user_input', userInputValue);
-    }
-
-    async function makePrediction(event) {
-      event.preventDefault();  // Prevent default form submission behavior
-
-      // Get user input
-      userInputValue = document.getElementById('user_input').value;
-
-      try {
-        // asynchronous POST request to the Django view
-        const response = await fetch('{% url "home" %}', {
-          method: 'POST',
-          headers: {
-            'Content-Type': 'application/x-www-form-urlencoded',
-            'X-CSRFToken': '{{ csrf_token }}',
-          },
-          body: new URLSearchParams({
-            'user_input': userInputValue,
-          }),
-        });
-
-        const data = await response.json();
-        console.log(data);
-
-        // Update only the result section dynamically
-        document.getElementById('result').innerHTML = '<p>' + data.result + '</p><p>' + data.prediction + '</p>';
-
-        // Set the user input back to the input field
-        document.getElementById('user_input').value = userInputValue;
-      } catch (error) {
-        console.error('Error:', error);
-      }
-    }
-
-    // Retain user input on page reload
-    window.onload = function() {
-      // Check session storage for user input
-      const storedUserInput = sessionStorage.getItem('user_input');
-      
-      if (storedUserInput) {
-        document.getElementById('user_input').value = storedUserInput;
-      }
-    };
-  </script>
-
-</div>
 {% endblock %}
