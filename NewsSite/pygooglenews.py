@@ -125,13 +125,14 @@ class GoogleNews:
         d['entries'] = self.__add_sub_articles(d['entries'])
         return d
 
-    def search(self, query: str, helper = True, when = None, from_ = None, to_ = None, proxies=None, scraping_bee=None):
+    def search(self, query: str, helper=True, when=None, from_=None, to_=None, proxies=None, scraping_bee=None, limit=5):
         """
         Return a list of all articles given a full-text search parameter,
         a country and a language
 
         :param bool helper: When True helps with URL quoting
-        :param str when: Sets a time range for the artiles that can be found
+        :param str when: Sets a time range for the articles that can be found
+        :param int limit: Number of articles to limit the search results to
         """
 
         if when:
@@ -151,7 +152,11 @@ class GoogleNews:
         search_ceid = self.__ceid()
         search_ceid = search_ceid.replace('?', '&')
 
-        d = self.__parse_feed(self.BASE_URL + '/search?q={}'.format(query) + search_ceid, proxies = proxies, scraping_bee=scraping_bee)
+        d = self.__parse_feed(self.BASE_URL + '/search?q={}'.format(query) + search_ceid, proxies=proxies, scraping_bee=scraping_bee)
 
         d['entries'] = self.__add_sub_articles(d['entries'])
+
+        # Limit the number of articles to the specified limit
+        d['entries'] = d['entries'][:limit]
+
         return d

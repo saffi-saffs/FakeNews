@@ -1,6 +1,6 @@
-{% extends 'homePage/index.html' %} {% block content %}
+{% extends 'homePage/index.html' %}
+{% block content %}
 <style>
- 
   #modelPredictions {
     width: 100%;
     height: 300px;
@@ -12,27 +12,22 @@
     padding: 10px;
     box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
     overflow-y: auto;
-    
   }
-a:link { 
-  text-decoration: none; 
-  color:black;
-} 
-a:visited { 
-  text-decoration: none; 
-  
-
-} 
-a:hover { 
-  text-decoration: none; 
-  color:blue;
-} 
-a:active { 
-  text-decoration: none; 
-  color:black;
-
-}
-
+  a:link {
+    text-decoration: none;
+    color: black;
+  }
+  a:visited {
+    text-decoration: none;
+  }
+  a:hover {
+    text-decoration: none;
+    color: blue;
+  }
+  a:active {
+    text-decoration: none;
+    color: black;
+  }
 </style>
 <div class="container-fluid mt-4 justify-content-center">
   <div class="row justify-content-center">
@@ -40,11 +35,9 @@ a:active {
     <div class="col-md-8">
       <!-- Detection page -->
       <div class="detectionWindow">
-        <h4>Claim Checking Model</h4>
-
+        <h4>Fake News Detection Model</h4>
         <form action="{% url 'claimcheck' %}" method="post">
           {% csrf_token %}
-          <!-- <label for="user_input">Enter news text:</label>-->
           <br />
           <textarea
             id="user_input"
@@ -64,36 +57,20 @@ a:active {
     <h4 class="justify-content-center">Result</h4>
     <div class="row justify-content-center">
       <div class="col-md-3 mb-3 ">
-        {% if result == 'This news is likely real.' %}
-                <strong style="font-size: 1.5rem; color: green;">{{result}}</strong>
-                 <p>{{ prediction }}</p>
-                  {% else %}
-               <strong style="font-size: 1.5rem; color: red;">{{result}}</strong>
-               <p>{{ prediction }}</p>
-                
-                {% endif %}
-        
+         Result:<strong style="font-size: 1.5rem; color: green;">{{ result }}</strong>
+        <p>Most Frequent Stance: <strong>{{ most_frequent_stance }}</strong></p>
       </div>
+      <br>
+    <h3>Related Articles</h3>
       {% for article in claim_results %}
       <div class="col-md-4 mb-4">
-          <a href="{{ article.link }}">
-        <div id="modelPredictions">
-          <h5>{{ article.title }}</h5>
-          <ul>
-            <li>Stance1: {{ article.p1 }}</li>
-            <li>Stance2: {{ article.p2 }}</li>
-            <li>Average Stance: {{ article.average }}</li>
-           
-            <!-- Display max value of p2 -->
-             <li>p1 stance: {{ article.maxp1 }}</li>
-             <li>p2 stance: {{ article.maxp2 }}</li>
-             <li>average stance: {{ article.maxavg }}</li>
-            
-
-
-            <!-- Display max value of p2 -->
-          </ul>
-        </div>
+        <a href="{{ article.link }}">
+          <div id="modelPredictions">
+            <h5>{{ article.title }}</h5>
+            <ul>
+              <li>p1 stance: {{ article.maxp1 }}</li>
+            </ul>
+          </div>
         </a>
       </div>
       {% endfor %}
@@ -109,10 +86,8 @@ a:active {
 
   async function makePrediction(event) {
     event.preventDefault(); // Prevent default form submission behavior
-
     // Get user input
     userInputValue = document.getElementById("user_input").value;
-
     try {
       // asynchronous POST request to the Django view
       const response = await fetch('{% url "home" %}', {
@@ -128,23 +103,19 @@ a:active {
 
       const data = await response.json();
       console.log(data);
-
       // Update only the result section dynamically
       document.getElementById("result").innerHTML =
         "<p>" + data.result + "</p><p>" + data.prediction + "</p>";
-
       // Set the user input back to the input field
       document.getElementById("user_input").value = userInputValue;
     } catch (error) {
       console.error("Error:", error);
     }
   }
-
   // Retain user input on page reload
   window.onload = function () {
     // Check session storage for user input
     const storedUserInput = sessionStorage.getItem("user_input");
-
     if (storedUserInput) {
       document.getElementById("user_input").value = storedUserInput;
     }

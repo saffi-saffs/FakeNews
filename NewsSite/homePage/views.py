@@ -3,8 +3,9 @@ from django.http import JsonResponse
 from keras.utils import pad_sequences
 from keras.preprocessing.text import Tokenizer
 from keras.models import load_model
-from django import forms
 
+from collections import Counter
+import os
 import nltk
 from nltk.corpus import stopwords
 import spacy
@@ -13,16 +14,35 @@ from sklearn.feature_extraction.text import TfidfVectorizer
 from sklearn.metrics.pairwise import cosine_similarity
 from sklearn.preprocessing import LabelEncoder
 import numpy as np
+import requests
 
 # Load English language model for NER
-nlp = spacy.load('en_core_web_sm')
-nltk.download('punkt')
-nltk.download('stopwords')
+import spacy
+
+#check for internet
+def has_internet_connection():
+    try:
+        requests.get("https://google.com", timeout=5)
+        return True
+    except (requests.ConnectionError, requests.Timeout):
+        return False
+    
+# Download the SpaCy model
+if not os.path.exists(os.path.join(nltk.data.find('corpora'), 'stopwords')):
+    nltk.download('punkt')
+    nltk.download('stopwords')
+
+# Download the SpaCy model if not already downloaded
+if not spacy.util.is_package("en_core_web_sm"):
+    spacy.cli.download("en_core_web_sm")
+
+# Load the downloaded SpaCy model
+nlp = spacy.load("en_core_web_sm")
 
 # Load Keras model
-model = load_model("C:\\Users\\Admin\\Downloads\\yt_balanced_lstm1.h5")
-model1 = load_model("E:\\models\\models\\model.h5")
-model2 = load_model("E:\\models\\models\\Pretainedmodelright.h5")
+model = load_model("C:\\Users\\Admin\\Downloads\\newlstm.h5")
+model1 = load_model("E:\models\models\modelrightepoch10.h5")
+
 
 # Initialize Tokenizer
 tokenizer = Tokenizer()
@@ -64,7 +84,7 @@ def NewsDisplay(request):
     similarity_scores = cosine_similarity(tfidf_matrix[0:1], tfidf_matrix[1:])[0]
     return similarity_scores
 def determine_stance(prediction):
-    # Define the labels for different stances
+    
     stances = ['Agree', 'Disagree', 'Discuss', 'Unrelated']
     
     # Determine the index of the maximum predicted value
@@ -74,49 +94,71 @@ def determine_stance(prediction):
     return stances[max_index]
 
 
-def check_stances(claim_text, articles, max_articles=15):
+def check_stances(claim_text, articles, max_articles=5):
     processed_claim = preprocess_text(claim_text)
     processed_articles = [preprocess_text(article['title']) for article in articles[:max_articles]]
     headline_sequences = [preprocess_input(article, 1000) for article in processed_articles]
     body_sequence = preprocess_input(processed_claim, 2000)
 
     predictions1 = [model1.predict([headline_sequence, body_sequence]) for headline_sequence in headline_sequences]
-    predictions2 = [model2.predict([headline_sequence, body_sequence]) for headline_sequence in headline_sequences]
-    combined_predictions = [(p1 + p2) / 2 for p1, p2 in zip(predictions1, predictions2)]
+   
 
     predicted_stances = []
-    for article, p1, p2, avg_prediction in zip(articles[:max_articles], predictions1, predictions2, combined_predictions):
+    for article, p1 in zip(articles[:max_articles], predictions1):
         max_p1_value = determine_stance(p1)
-        max_p2_value = determine_stance(p2) 
-        max_avg_value = determine_stance(avg_prediction) 
+       
 
 
          
-        predicted_stances.append({'title': article['title'],'link':article['link'] ,'p1': p1, 'p2': p2, 'average': avg_prediction, 'maxp1': max_p1_value, 'maxp2': max_p2_value, 'maxavg': max_avg_value})
+        predicted_stances.append({'title': article['title'],'link':article['link'] , 'maxp1': max_p1_value})
 
     return predicted_stances
 
 
 
-def verify_claim(claim_text, max_articles=10):
+def verify_claim(claim_text, max_articles=5):
     gn = GoogleNews(lang='en',country='US')
-    search_results = gn.search(preprocess_text(claim_text))
-    articles = search_results['entries'][:max_articles]  # Limit the number of articles
+    search_results = gn.search(preprocess_text(claim_text),limit=5)
+    articles = search_results['entries'][:max_articles] 
     claim_results = check_stances(claim_text, articles)
+    stance_counts = Counter(article['maxp1'] for article in claim_results)
+    
+    
+    most_common_stance, _ = stance_counts.most_common(1)[0]
+    
+    
     return claim_results
+    
 
+
+
+    
+from collections import Counter
 
 def ClaimCheck(request):
     if request.method == 'POST':
         claim_text = request.POST.get('user_input')
         prediction = predict_fake_news(claim_text)
-        result = 'This news is likely real.' if prediction > 0.8 else 'This news is likely fake.'  
-          
-        if claim_text:
-            claim_results = verify_claim(claim_text)
-            
-            
-            context = {'claim_results': claim_results
-                       ,'result':result,'prediction': prediction}
-            return render(request, "homePage/claimchecking.html", context)
+        result = 'This news is likely real.' if prediction > 0.6 else 'This news is likely fake.'  
+        if(has_internet_connection()):
+            if claim_text:
+                claim_results = verify_claim(claim_text)
+                # Count occurrences of each stance
+                stances = [article['maxp1'] for article in claim_results]
+                stance_counts = Counter(stances)
+                # Find the most frequent stance
+                most_frequent_stance = stance_counts.most_common(1)[0][0]
+                
+                context = {'claim_results': claim_results,
+                           'result': result,
+                           'prediction': prediction,
+                           'most_frequent_stance': most_frequent_stance}
+                return render(request, "homePage/claimchecking.html", context)
+        else:
+            context = {'prediction': prediction,'result': result}
+            return render(request, "homePage/result.html", context)
     return render(request, "homePage/claimchecking.html")
+
+
+def check123():
+    return "hello 123"

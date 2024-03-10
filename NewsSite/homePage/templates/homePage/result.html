@@ -1,41 +1,131 @@
-<!-- homePage/templates/homePage/result.html -->
-
-{% extends 'homePage/homeindex.html' %} {% block result %}
-  {% if result %}
-<p>{{ result }}</p>
-<p>{{ prediction }}</p>
+{% extends 'homePage/index.html' %} {% block content %}
+<style>
  
-<div id="myProgress">
-  <div id="myBar"></div>
+  #modelPredictions {
+    width: 100%;
+    height: 300px;
+    border-bottom: 1px solid #ccc;
+    padding-bottom: 10px;
+    margin-bottom: 10px;
+    border: 1px solid #ddd;
+    border-radius: 8px;
+    padding: 10px;
+    box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+    overflow-y: auto;
+    
+  }
+a:link { 
+  text-decoration: none; 
+  color:black;
+} 
+a:visited { 
+  text-decoration: none; 
+  
+
+} 
+a:hover { 
+  text-decoration: none; 
+  color:blue;
+} 
+a:active { 
+  text-decoration: none; 
+  color:black;
+
+}
+
+</style>
+<div class="container-fluid mt-4 justify-content-center">
+  <div class="row justify-content-center">
+    <!-- Detection Window Column -->
+    <div class="col-md-8">
+      <!-- Detection page -->
+      <div class="detectionWindow">
+        <h4>Claim Checking Model</h4>
+
+        <form action="{% url 'claimcheck' %}" method="post">
+          {% csrf_token %}
+          <!-- <label for="user_input">Enter news text:</label>-->
+          <br />
+          <textarea
+            id="user_input"
+            name="user_input"
+            required
+            oninput="setUserInputToSessionStorage()"
+            style="width: 80%;"
+          ></textarea>
+          <br />
+          <button type="submit" class="btn btn-dark">Predict</button>
+        </form>
+      </div>
+    </div>
+  </div>
+  <!-- Result section -->
+  <div class="container-fluid mt-4 justify-content-center">
+    <h4 class="justify-content-center">Result</h4>
+    <div class="row justify-content-center">
+      <div class="col-md-3 mb-3 ">
+        {% if result == 'This news is likely real.' %}
+                <strong style="font-size: 1.5rem; color: green;">{{result}}</strong>
+                 <p>{{ prediction }}</p>
+                  {% else %}
+               <strong style="font-size: 1.5rem; color: red;">{{result}}</strong>
+               <p>{{ prediction }}</p>
+                
+                {% endif %}
+        <h1>No Internet</h1>
+      </div>
+      
+    </div>
+  </div>
 </div>
- {% endif %}
 
 <script>
-    var i = 0;
+  function setUserInputToSessionStorage() {
+    userInputValue = document.getElementById("user_input").value;
+    sessionStorage.setItem("user_input", userInputValue);
+  }
 
- var prediction = "{{ prediction|default:0 }}";
-move(parseFloat(prediction) * 100);
+  async function makePrediction(event) {
+    event.preventDefault(); // Prevent default form submission behavior
 
+    // Get user input
+    userInputValue = document.getElementById("user_input").value;
 
-    function move(uiValue) {
-        if (i == 0) {
-            i = 1;
-            var elem = document.getElementById("myBar");
-            var width = 10;
-            var id = setInterval(frame, 10);
+    try {
+      // asynchronous POST request to the Django view
+      const response = await fetch('{% url "home" %}', {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/x-www-form-urlencoded",
+          "X-CSRFToken": "{{ csrf_token }}",
+        },
+        body: new URLSearchParams({
+          user_input: userInputValue,
+        }),
+      });
 
-            function frame() {
-                if (width >= uiValue) {
-                    clearInterval(id);
-                    i = 0;
-                } else {
-                    width++;
-                    elem.style.width = width + "%";
-                    elem.innerHTML = width + "%";
-                }
-            }
-        }
+      const data = await response.json();
+      console.log(data);
+
+      // Update only the result section dynamically
+      document.getElementById("result").innerHTML =
+        "<p>" + data.result + "</p><p>" + data.prediction + "</p>";
+
+      // Set the user input back to the input field
+      document.getElementById("user_input").value = userInputValue;
+    } catch (error) {
+      console.error("Error:", error);
     }
-</script>
+  }
 
+  // Retain user input on page reload
+  window.onload = function () {
+    // Check session storage for user input
+    const storedUserInput = sessionStorage.getItem("user_input");
+
+    if (storedUserInput) {
+      document.getElementById("user_input").value = storedUserInput;
+    }
+  };
+</script>
 {% endblock %}
