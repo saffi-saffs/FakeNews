@@ -4,6 +4,13 @@
   margin-left: 35%;
 }
 
+body{
+  font-family: "Space Grotesk", sans-serif;
+  font-optical-sizing: auto;
+  font-weight: 600;
+  font-style: normal;
+}
+
 form textarea {
   width: 95%;
   height: 150px;
@@ -14,6 +21,15 @@ form textarea {
   padding-top: 2px;
   margin-left: 20px;
 }
+
+
+.sticky {
+  position: fixed;
+  top: 0;
+  width: 100%;
+}
+
+
 nav{
 
   color:aliceblue;
@@ -60,11 +76,13 @@ form {
   box-shadow: 0 0 1rem #ffff;
 }
 
+
+
 #myBar {
   width: 0%;
   height: 1.5rem;
   border-radius: 1rem;
-  background: linear-gradient(90deg, #a6a6e7 25%, #08499f 100%);
+  background: linear-gradient(90deg, #A98EDA 25%, #6F42C1 100%);
   transition: all 3s ease-in-out;
   color: white;
 }

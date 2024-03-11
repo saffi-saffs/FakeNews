@@ -40,8 +40,8 @@ if not spacy.util.is_package("en_core_web_sm"):
 nlp = spacy.load("en_core_web_sm")
 
 # Load Keras model
-model = load_model("C:\\Users\\Admin\\Downloads\\newlstm.h5")
-model1 = load_model("E:\models\models\modelrightepoch10.h5")
+model = load_model("C:\models\yt_balanced_lstm1.h5")
+model1 = load_model("C:\models\modelright.h5")
 
 
 # Initialize Tokenizer
@@ -160,5 +160,3 @@ def ClaimCheck(request):
     return render(request, "homePage/claimchecking.html")
 
 
-def check123():
-    return "hello 123"

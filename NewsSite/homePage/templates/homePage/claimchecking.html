@@ -1,6 +1,8 @@
 {% extends 'homePage/index.html' %}
 {% block content %}
 <style>
+
+
   #modelPredictions {
     width: 100%;
     height: 300px;
@@ -29,13 +31,13 @@
     color: black;
   }
 </style>
-<div class="container-fluid mt-4 justify-content-center">
+<div class="container mt-4 justify-content-center">
   <div class="row justify-content-center">
     <!-- Detection Window Column -->
     <div class="col-md-8">
       <!-- Detection page -->
       <div class="detectionWindow">
-        <h4>Fake News Detection Model</h4>
+        <h4>Enter news article:</h4>
         <form action="{% url 'claimcheck' %}" method="post">
           {% csrf_token %}
           <br />
@@ -44,41 +46,104 @@
             name="user_input"
             required
             oninput="setUserInputToSessionStorage()"
-            style="width: 80%;"
+            style="width: 600px ; height: 250px"
           ></textarea>
           <br />
           <button type="submit" class="btn btn-dark">Predict</button>
         </form>
       </div>
     </div>
-  </div>
-  <!-- Result section -->
-  <div class="container-fluid mt-4 justify-content-center">
-    <h4 class="justify-content-center">Result</h4>
-    <div class="row justify-content-center">
-      <div class="col-md-3 mb-3 ">
-         Result:<strong style="font-size: 1.5rem; color: green;">{{ result }}</strong>
-        <p>Most Frequent Stance: <strong>{{ most_frequent_stance }}</strong></p>
-      </div>
-      <br>
-    <h3>Related Articles</h3>
-      {% for article in claim_results %}
-      <div class="col-md-4 mb-4">
-        <a href="{{ article.link }}">
-          <div id="modelPredictions">
-            <h5>{{ article.title }}</h5>
-            <ul>
-              <li>p1 stance: {{ article.maxp1 }}</li>
-            </ul>
-          </div>
-        </a>
-      </div>
-      {% endfor %}
+
+    <!-- Result section -->
+    <div class="col-sm-4">
+      <h4 >Result</h4>
+      Result:
+      {% if result == 'This news is likely real.' %}
+        <strong style="font-size: medium; color: #198754;">{{ result }}</strong>
+                 <div id="myProgress">
+                  <div id="myBar"></div>
+                 </div>
+      {% else %}
+       <strong style="font-size: medium; color: #dc3545;">{{result}}</strong>
+                  <div id="myProgress">
+                   <div id="myBar"></div>
+                   </div>
+       {% endif %}
+      <p>Most Frequent Stance: <strong>{{ most_frequent_stance }}</strong></p>
     </div>
   </div>
 </div>
+  <!-- divider window -->
+ <hr width="90%" size="3" color="silver">
+  <!-- Stance result window -->
+<div class="container mt-4 justify-content-center">
+    <h5 style = "text-align: center; ">Related Articles</h5>
+    <div id="articleTable">
+      
+      <table class="table table-striped">
+        <thead>
+          <tr>
+            <th scope="col">Stance</th>
+            <th scope="col">Article</th>
+          </tr>
+        </thead>
+        <tbody>
+          {% for article in claim_results %}
+          <tr>
+            <td>{{ article.maxp1 }}</td>
+            <td><a href="{{ article.link }}">{{ article.title }}</a></td>
+          </tr>
+          {% endfor %}
+        </tbody>
+      </table>
+      
+      <!--div class="col-md-4 mb-4">
+        
+          <div id="modelPredictions">
+            <h5></h5>
+            <ul>
+              <li></li>
+            </ul>
+          </div>
+        </a>
+      </div-->
+      
+      
+    </div>
+</div>
+  
+  
 
 <script>
+  
+  
+  'JavaScript code for the progress bar'
+  
+  var i = 0;
+  var prediction = "{{ prediction|default:0 }}";
+  move(parseFloat(prediction) * 100);
+
+  function move(uiValue) {
+    if (i == 0) {
+      i = 1;
+      var elem = document.getElementById("myBar");
+      var width = 10;
+      var id = setInterval(frame, 10);
+
+      function frame() {
+        if (width >= uiValue) {
+          clearInterval(id);
+          i = 0;
+        } else {
+          width++;
+          elem.style.width = width + "%";
+          elem.innerHTML = width + "%";
+        }
+      }
+    }
+  }
+
+
   function setUserInputToSessionStorage() {
     userInputValue = document.getElementById("user_input").value;
     sessionStorage.setItem("user_input", userInputValue);
