@@ -30,6 +30,12 @@
     text-decoration: none;
     color: black;
   }
+ #user_input{
+  border:2px silver solid;
+  padding:5px;
+  margin-left:4px;
+  
+ }
 </style>
 <div class="container mt-4 justify-content-center">
   <div class="row justify-content-center">
@@ -46,18 +52,20 @@
             name="user_input"
             required
             oninput="setUserInputToSessionStorage()"
-            style="width: 600px ; height: 250px"
+            style="width: 480px ; height: 220px"
           ></textarea>
           <br />
           <button type="submit" class="btn btn-dark">Predict</button>
         </form>
       </div>
     </div>
-<br>
+
     <!-- Result section -->
-    <div class="col-sm-5">
-      <h4 >Result</h4>
-      Result:
+    <div class="col-sm-4">
+      <br>
+      <h4> Result</h4>
+       <hr width="95%" size="4" color="silver">
+     <br>
       {% if result == 'This news is likely real.' %}
         <strong style="font-size: medium; color: #198754;">{{ result }}</strong>
                  <div id="myProgress">
@@ -74,7 +82,7 @@
   </div>
 </div>
   <!-- divider window -->
- <hr width="90%" size="3" color="silver">
+ <hr width="90%" size="4" color="silver">
   <!-- Stance result window -->
 <div class="container mt-4 justify-content-center">
     <h5 style = "text-align: center; ">Related Articles</h5>
@@ -117,32 +125,31 @@
 <script>
   
   
-  //JavaScript code for the progress bar
+  'JavaScript code for the progress bar'
   
-  var i = 0;
-  var prediction = "{{ prediction|default:0 }}";
-  move(parseFloat(prediction) * 100);
+ var i = 0;
+var prediction = parseFloat("{{ prediction|default:0 }}");
+move(prediction *100);
 
-  function move(uiValue) {
-    if (i == 0) {
-      i = 1;
-      var elem = document.getElementById("myBar");
-      var width = 10;
-      var id = setInterval(frame, 10);
+function move(uiValue) {
+  if (i == 0) {
+    i = 1;
+    var elem = document.getElementById("myBar");
+    var width = 0; // Initialize width to 0
+    var id = setInterval(frame, 10);
 
-      function frame() {
-        if (width >= uiValue) {
-          clearInterval(id);
-          i = 0;
-        } else {
-          width++;
-          elem.style.width = width + "%";
-          elem.innerHTML = width + "%";
-        }
+    function frame() {
+      if (width >= uiValue) {
+        clearInterval(id);
+        i = 0;
+      } else {
+        width++;
+        elem.style.width = width + "%";
+        elem.innerHTML = width + "%";
       }
     }
   }
-
+}
 
   function setUserInputToSessionStorage() {
     userInputValue = document.getElementById("user_input").value;

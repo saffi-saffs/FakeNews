@@ -19,7 +19,9 @@ form textarea {
   border: 1px solid #3e3939;
   padding: 2px;
   padding-top: 2px;
-  margin-left: 20px;
+  margin-left: 15px;
+  margin-right :5px;
+  border:2px solid black;
 }
 
 
