@@ -57,8 +57,14 @@
     <h4 class="justify-content-center">Result</h4>
     <div class="row justify-content-center">
       <div class="col-md-3 mb-3 ">
-         Result:<strong style="font-size: 1.5rem; color: green;">{{ result }}</strong>
-        <p>Most Frequent Stance: <strong>{{ most_frequent_stance }}</strong></p>
+       {% if result == 'This news is likely real.' %}
+                <strong style="font-size: 1.5rem; color: green;">{{result}}</strong>
+                 
+                  {% else %}
+               <strong style="font-size: 1.5rem; color: red;">{{result}}</strong>
+               
+                
+                {% endif %}
       </div>
       <br>
     <h3>Related Articles</h3>
@@ -85,11 +91,11 @@
   }
 
   async function makePrediction(event) {
-    event.preventDefault(); // Prevent default form submission behavior
+    event.preventDefault(); 
     // Get user input
     userInputValue = document.getElementById("user_input").value;
     try {
-      // asynchronous POST request to the Django view
+     
       const response = await fetch('{% url "home" %}', {
         method: "POST",
         headers: {
@@ -103,7 +109,7 @@
 
       const data = await response.json();
       console.log(data);
-      // Update only the result section dynamically
+      
       document.getElementById("result").innerHTML =
         "<p>" + data.result + "</p><p>" + data.prediction + "</p>";
       // Set the user input back to the input field
@@ -112,9 +118,9 @@
       console.error("Error:", error);
     }
   }
-  // Retain user input on page reload
+  
   window.onload = function () {
-    // Check session storage for user input
+   
     const storedUserInput = sessionStorage.getItem("user_input");
     if (storedUserInput) {
       document.getElementById("user_input").value = storedUserInput;

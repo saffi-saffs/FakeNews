@@ -16,9 +16,7 @@ def has_internet_connection():
 
 
 def News(request):
-    # Fetch articles from Google News
     if has_internet_connection():
-
         gn = GoogleNews(lang='en', country='US')
         top = gn.top_news()
         top_entries = top['entries']
@@ -41,7 +39,7 @@ def News(request):
             }
             entry_details.append(entry_detail)
 
-    # Paginate the articles
+    # Pagination
         paginator = Paginator(entry_details, 5)
         page = request.GET.get('page')
 

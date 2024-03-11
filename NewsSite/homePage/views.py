@@ -1,23 +1,19 @@
 from django.shortcuts import render
-from django.http import JsonResponse
 from keras.utils import pad_sequences
 from keras.preprocessing.text import Tokenizer
 from keras.models import load_model
-
 from collections import Counter
 import os
 import nltk
 from nltk.corpus import stopwords
 import spacy
 from pygooglenews import GoogleNews
-from sklearn.feature_extraction.text import TfidfVectorizer
-from sklearn.metrics.pairwise import cosine_similarity
-from sklearn.preprocessing import LabelEncoder
 import numpy as np
 import requests
-
-# Load English language model for NER
 import spacy
+from collections import Counter
+
+
 
 #check for internet
 def has_internet_connection():
@@ -47,26 +43,30 @@ model1 = load_model("E:\models\models\modelrightepoch10.h5")
 # Initialize Tokenizer
 tokenizer = Tokenizer()
 
+#preprocess the text to remove stopwords
 def preprocess_text(text):
-    if isinstance(text, list):  # Check if input is a list
-        # Concatenate the list elements into a single string
+    if isinstance(text, list): 
         text = ' '.join(text)
     tokens = nltk.word_tokenize(text.lower())
     stop_words = set(stopwords.words('english'))
     tokens = [word for word in tokens if word not in stop_words]
     return ' '.join(tokens)
 
+#take user input to send for preprocessing 
 def preprocess_input(user_input, maxlen):
     user_input = preprocess_text(user_input)
     tokenizer.fit_on_texts([user_input])
     user_input_sequence = tokenizer.texts_to_sequences([user_input])
     return pad_sequences(user_input_sequence, maxlen=maxlen)
 
+
+#model1 prediciton
 def predict_fake_news(user_input):
     processed_input = preprocess_input(user_input, 1000)
     prediction = model.predict(processed_input)[0, 0]
     return prediction
 
+#
 def NewsDisplay(request):
     if request.method == 'POST':
         user_input = request.POST.get('user_input', '')
@@ -76,21 +76,10 @@ def NewsDisplay(request):
             return render(request, 'homePage/homeindex.html', {'result': result, 'prediction': prediction})
     return render(request, "homePage/homeindex.html")
 
-##def calculate_similarity(claim, articles):
-    processed_claim = preprocess_text(claim)
-    processed_articles = [preprocess_text(article) for article in articles]
-    vectorizer = TfidfVectorizer()
-    tfidf_matrix = vectorizer.fit_transform([processed_claim] + processed_articles)
-    similarity_scores = cosine_similarity(tfidf_matrix[0:1], tfidf_matrix[1:])[0]
-    return similarity_scores
-def determine_stance(prediction):
-    
+#determine the max stace based on the prediction
+def determine_stance(prediction):  
     stances = ['Agree', 'Disagree', 'Discuss', 'Unrelated']
-    
-    # Determine the index of the maximum predicted value
     max_index = np.argmax(prediction)
-    
-    # Return the stance corresponding to the maximum index
     return stances[max_index]
 
 
@@ -121,19 +110,13 @@ def verify_claim(claim_text, max_articles=5):
     search_results = gn.search(preprocess_text(claim_text),limit=5)
     articles = search_results['entries'][:max_articles] 
     claim_results = check_stances(claim_text, articles)
-    stance_counts = Counter(article['maxp1'] for article in claim_results)
-    
-    
+    stance_counts = Counter(article['maxp1'] for article in claim_results) 
     most_common_stance, _ = stance_counts.most_common(1)[0]
-    
-    
+ 
     return claim_results
     
 
-
-
-    
-from collections import Counter
+  
 
 def ClaimCheck(request):
     if request.method == 'POST':
@@ -160,5 +143,3 @@ def ClaimCheck(request):
     return render(request, "homePage/claimchecking.html")
 
 
-def check123():
-    return "hello 123"
