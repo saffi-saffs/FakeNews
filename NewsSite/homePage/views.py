@@ -40,8 +40,8 @@ if not spacy.util.is_package("en_core_web_sm"):
 nlp = spacy.load("en_core_web_sm")
 
 # Load Keras model
-model = load_model("C:\models\yt_balanced_lstm1.h5")
-model1 = load_model("C:\models\modelright.h5")
+model = load_model("D:\\FakeNews\\model\\newlstm.h5")
+model1 = load_model("D:\\FakeNews\\model\\modelrightepoch10.h5")
 
 
 # Initialize Tokenizer
@@ -76,13 +76,7 @@ def NewsDisplay(request):
             return render(request, 'homePage/homeindex.html', {'result': result, 'prediction': prediction})
     return render(request, "homePage/homeindex.html")
 
-##def calculate_similarity(claim, articles):
-    processed_claim = preprocess_text(claim)
-    processed_articles = [preprocess_text(article) for article in articles]
-    vectorizer = TfidfVectorizer()
-    tfidf_matrix = vectorizer.fit_transform([processed_claim] + processed_articles)
-    similarity_scores = cosine_similarity(tfidf_matrix[0:1], tfidf_matrix[1:])[0]
-    return similarity_scores
+
 def determine_stance(prediction):
     
     stances = ['Agree', 'Disagree', 'Discuss', 'Unrelated']
