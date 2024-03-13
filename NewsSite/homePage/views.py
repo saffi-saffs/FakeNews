@@ -1,17 +1,13 @@
 from django.shortcuts import render
-from django.http import JsonResponse
 from keras.utils import pad_sequences
 from keras.preprocessing.text import Tokenizer
 from keras.models import load_model
-
 from collections import Counter
 import os
 import nltk
 from nltk.corpus import stopwords
 import spacy
 from pygooglenews import GoogleNews
-from sklearn.feature_extraction.text import TfidfVectorizer
-from sklearn.metrics.pairwise import cosine_similarity
 from sklearn.preprocessing import LabelEncoder
 import numpy as np
 import requests
@@ -118,7 +114,11 @@ def verify_claim(claim_text, max_articles=5):
     stance_counts = Counter(article['maxp1'] for article in claim_results)
     
     
-    most_common_stance, _ = stance_counts.most_common(1)[0]
+    if stance_counts:  # Check if stance_counts is not empty
+        most_common_stance = stance_counts.most_common(1)[0]
+    else:
+        most_common_stance = "No Related Articles available"
+
     
     
     return claim_results
@@ -141,7 +141,10 @@ def ClaimCheck(request):
                 stances = [article['maxp1'] for article in claim_results]
                 stance_counts = Counter(stances)
                 # Find the most frequent stance
-                most_frequent_stance = stance_counts.most_common(1)[0][0]
+                if stance_counts:  # Check if stance_counts is not empty
+                    most_frequent_stance = stance_counts.most_common(1)[0][0]
+                else:
+                    most_frequent_stance = "No Related Articles available"
                 
                 context = {'claim_results': claim_results,
                            'result': result,
